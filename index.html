@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://vuejs.org/js/vue.js"></script>
+    </head>
+    <body>
+        <div id=app>
+            <ol id="olPlayers">
+                <li v-for="player in playerList">
+                    <!-- {{ player.name }} -->
+                    <input type="text" v-model="player">
+                </li>
+            </ol>
+            <div>
+                <input type="range" id="playerCount" name="Player Count" min="3" max="6"></input>
+                <table id="summaryTable">
+                    
+                </table>
+            </div>
+            <div id="divLog">
+                <button onclick="addLogItem()">Add</button>
+                <ol id="olLogReversed" reversed></ol>
+            </div>
+        </div>
+        <script src="main.js"></script>
+    </body>
+</html>
