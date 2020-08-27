@@ -1,25 +1,122 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="https://vuejs.org/js/vue.js"></script>
+        <style src="style.css"></style>
+        <!-- <script src="https://vuejs.org/js/vue.js"></script> -->
+        <script src="vue.js"></script>
     </head>
     <body>
         <div id=app>
-            <ol id="olPlayers">
-                <li v-for="player in playerList">
-                    <!-- {{ player.name }} -->
-                    <input type="text" v-model="player">
-                </li>
-            </ol>
+            <div id=divPlayers>
+                <h2>Players</h2>
+                <ol id="olPlayers">
+                    <li v-for="(player, index) in players">
+                        <!-- {{ player.name }} -->
+                        <input type="text" v-model="player.name">
+                        <button v-on:click="moveInArray(players, index, index-1)">⏫</button>
+                        <button v-on:click="moveInArray(players, index, index+1)">⏬</button>
+                        <button v-on:click="players.splice(index, 1)">🗑️</button>
+                    </li>
+                </ol>
+                <button v-on:click="addPlayer">Add</button>
+            </div>
             <div>
-                <input type="range" id="playerCount" name="Player Count" min="3" max="6"></input>
+                <h2>Summary</h2>
+                <button v-on:click="computeSummary">Compute</button>
                 <table id="summaryTable">
-                    
+                    <tr>
+                        <th></th>
+                        <th v-for="player in players">{{ player.name }}</th>
+                    </tr>
+                    <tr><td>---</td></tr>
+                    <tr v-for="suspect in suspects" style="border-bottom: 1px;">
+                        <td>{{ suspect.name }}</td>
+                        <td v-for="player in players">
+                            {{ player.cards.suspects[suspect.id] }}
+                        </td>
+                    </tr>
+                    <tr><td>---</td></tr>
+                    <tr v-for="weapon in weapons">
+                        <td>{{ weapon.name }}</td>
+                        <td v-for="player in players">
+                            {{ player.cards.weapons[weapon.id] }}
+                        </td>
+                    </tr>
+                    <tr><td>---</td></tr>
+                    <tr v-for="room in rooms">
+                        <td>{{ room.name }}</td>
+                        <td v-for="player in players">
+                            {{ player.cards.rooms[room.id] }}
+                        </td>
+                    </tr>
                 </table>
             </div>
             <div id="divLog">
-                <button onclick="addLogItem()">Add</button>
-                <ol id="olLogReversed" reversed></ol>
+                <h2>Log</h2>
+                <button v-on:click="addSuggestion(-1)">Add</button>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th>Player</th>
+                        <th>Room</th>
+                        <th>Suspect</th>
+                        <th>Weapon</th>
+                        <th>Player Answered</th>
+                    </tr>
+                    <tr v-for="(logItem, logIndex) in suggestions">
+                        <td>
+                            {{ logIndex }}
+                            <!-- {{ logItem.id }} -->
+                        </td>
+                        <td>
+                            <select v-model=logItem.playerAsked>
+                                <option v-bind:value="player" v-for="player in players">{{ player.name }}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select v-model=logItem.room>
+                                <option v-bind:value="room" v-for="room in rooms">{{ room.name }}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select v-model=logItem.suspect>
+                                <option v-bind:value="suspect" v-for="suspect in suspects">{{ suspect.name }}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select v-model=logItem.weapon>
+                                <option v-bind:value="weapon" v-for="weapon in weapons">{{ weapon.name }}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select v-model=logItem.playerAnswered>
+                                <option v-bind:value="player" v-for="player in players">{{ player.name }}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select v-model=logItem.answer>
+                                <option></option>
+                                <option>suspect</option>
+                                <option>weapon</option>
+                                <option>room</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button v-on:click="moveInArray(suggestions, logIndex, logIndex-1)">⏫</button>
+                            <button v-on:click="moveInArray(suggestions, logIndex, logIndex+1)">⏬</button>
+                            <button v-on:click="addSuggestion(logIndex+1)">+</button>
+                            <button v-on:click="suggestions.splice(logIndex, 1)">🗑️</button>
+                        </td>
+                    </tr>
+                </table>
+                <!-- <ol id="olLogReversed" reversed v-for="logItem in suggestions">
+                    <li>
+                        <select v-for="player in players">
+                            <option v-model="player.name"></option>
+                        </select>
+                        <button>🗑️</button>
+                    </li>
+                </ol> -->
             </div>
         </div>
         <script src="main.js"></script>

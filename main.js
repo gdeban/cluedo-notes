@@ -1,4 +1,4 @@
-const suspectListFR = [
+const suspectsFR = [
     "Colonel Moutarde",
     "Professeur Violet",
     "Révérend Olive",
@@ -7,7 +7,7 @@ const suspectListFR = [
     "Mme Leblanc"
 ]
 
-const weaponListFR = [
+const weaponsFR = [
     "Poignard",
     "Chandelier",
     "Revolver",
@@ -16,7 +16,7 @@ const weaponListFR = [
     "Clé anglaise"
 ]
 
-const roomListFR = [
+const roomsFR = [
     "Hall",
     "Salon",
     "Salle à manger",
@@ -28,100 +28,71 @@ const roomListFR = [
     "Bureau"
 ]
 
-var playerList = [{name:"1"}, {name:"2"}, {name:"3"}];
-var suspectList = suspectListFR;
-var weaponList = weaponListFR;
-var roomList = roomListFR;
-var gameLog = []
+let id = 0;
+var players = [{name:"1"}, {name:"2"}, {name:"3"}];
+var suspects = []; id = 0; suspectsFR.forEach(v => suspects.push({id: id++, name: v}));
+var weapons = []; id = 0; weaponsFR.forEach(v => weapons.push({id: id++, name: v}));
+var rooms = []; id= 0; roomsFR.forEach(v => rooms.push({id: id++, name: v}));
+var suggestions = [];
+var summary = {};
+
+
+
+function computeSummary() {
+    let playerIx = 0;
+    players.forEach(function (player) {
+        player.cards = {suspects:[], weapons:[], rooms:[]};
+        suspects.forEach(s => player.cards.suspects.push("?"));
+        weapons.forEach(s => player.cards.weapons.push("?"));
+        rooms.forEach(s => player.cards.rooms.push("?"));
+        player.ix = playerIx++;
+    });
+    suggestions.forEach(suggestion => {
+        // mark cards that players have)
+        if (suggestion.answer == "suspect") suggestion.playerAnswered.cards.suspects[suggestion.suspect.id] = "yes";
+        else if (suggestion.answer == "weapon") suggestion.playerAnswered.cards.weapons[suggestion.weapon.id] = "yes";
+        else if (suggestion.answer == "room") suggestion.playerAnswered.cards.rooms[suggestion.room.id] = "yes";
+        // mark cards that players don't have
+        let playerStop = suggestion.playerAnswered == null ? suggestion.playerAsked : suggestion.playerAnswered;
+        playersBetween(suggestion.playerAsked, playerStop).forEach(player => {
+            player.cards.suspects[suggestion.suspect.id] = "no";
+            player.cards.weapons[suggestion.weapon.id] = "no";
+            player.cards.rooms[suggestion.room.id] = "no";
+        })
+    });
+}
+
+computeSummary();
 
 var vm = new Vue({
     el:"#app",
     data: {
-        playerList: playerList,
-        suspectList: suspectList,
-        weaponList: weaponList,
-        roomList: roomList,
-        gameLog: gameLog,
+        players: players,
+        suspects: suspects,
+        weapons: weapons,
+        rooms: rooms,
+        suggestions: suggestions,
+        summary: summary
+    },
+    methods: {
+        addPlayer: function (event) {
+            this.players.push({name: ""});
+        },
+        moveInArray: function (input, from, to) {
+            const elm = input.splice(from, 1)[0];
+            input.splice(to, 0, elm);
+        },
+        addSuggestion: function (index) {
+            suggestions.splice(index, 0, {id: suggestions.length, playerAsked: "", suspect:"", weapon: "", room:"", playerAnswered:""});
+        },
+        computeSummary: computeSummary
     }
-})
+});
 
-function build() {
-
-}
-
-function buildSelectPlayer() {
-    let selectPlayer = document.createElement("select");
-    selectPlayer.name = "selectPlayer";
-    {
-        let option = document.createElement("option");
-        option.innerHTML = "";
-        selectPlayer.append(option);
+function playersBetween(player1, player2) {
+    if (player2.ix < player1.ix) {
+        return players.slice(0, player2.ix).concat(players.slice(player1.ix + 1));
     }
-    playerList.forEach(playerName => {
-        let option = document.createElement("option");
-        option.innerHTML = playerName;
-        selectPlayer.append(option);
-    })
-    return selectPlayer;
+    else return players.slice(player1.ix + 1, player2.ix);
 }
 
-function buildSelectSuspect() {
-    let selectSuspect = document.createElement("select");
-    selectSuspect.name = "selectSuspect";
-    suspectList.forEach(suspectName => {
-        let option = document.createElement("option");
-        option.innerHTML = suspectName;
-        selectSuspect.append(option);
-    })
-    return selectSuspect;
-}
-
-function buildSelectWeapon() {
-    let selectWeapon = document.createElement("select");
-    selectWeapon.name = "selectWeapon";
-    weaponList.forEach(weaponName => {
-        let option = document.createElement("option");
-        option.innerHTML = weaponName;
-        selectWeapon.append(option);
-    })
-    return selectWeapon;
-}
-
-function buildSelectRoom() {
-    let selectRoom = document.createElement("select");
-    selectRoom.name = "selectRoom";
-    roomList.forEach(roomName => {
-        let option = document.createElement("option");
-        option.innerHTML = roomName;
-        selectRoom.append(option);
-    })
-    return selectRoom;
-}
-
-function addLogItem(elementBefore) {
-    let ol = document.getElementById("olLogReversed");
-    let li = document.createElement("li");
-
-    if (elementBefore == undefined) {
-        ol.prepend(li);
-    }
-    else {
-        elementBefore.after(li);
-    }
-
-    li.append(buildSelectPlayer());
-    li.append(buildSelectSuspect());
-    li.append(buildSelectWeapon());
-    li.append(buildSelectRoom());
-    li.append(buildSelectPlayer());
-
-    let buttonDelete = document.createElement("button");
-    li.append(buttonDelete);
-    buttonDelete.onclick = () => li.remove();
-    buttonDelete.innerHTML = "🗑️";
-
-    let buttonAddAfter = document.createElement("button");
-    li.append(buttonAddAfter);
-    buttonAddAfter.onclick = () => addLogItem(li);
-    buttonAddAfter.innerHTML = "➕⬇";
-}
