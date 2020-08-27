@@ -90,6 +90,7 @@
                         </td>
                         <td>
                             <select v-model=logItem.playerAnswered>
+                                <option v-bind:value="null"></option>
                                 <option v-bind:value="player" v-for="player in players">{{ player.name }}</option>
                             </select>
                         </td>

@@ -77,6 +77,7 @@ var vm = new Vue({
     methods: {
         addPlayer: function (event) {
             this.players.push({name: ""});
+            computeSummary();
         },
         moveInArray: function (input, from, to) {
             const elm = input.splice(from, 1)[0];
@@ -90,7 +91,7 @@ var vm = new Vue({
 });
 
 function playersBetween(player1, player2) {
-    if (player2.ix < player1.ix) {
+    if (player2.ix <= player1.ix) {
         return players.slice(0, player2.ix).concat(players.slice(player1.ix + 1));
     }
     else return players.slice(player1.ix + 1, player2.ix);
